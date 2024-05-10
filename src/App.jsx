@@ -7,6 +7,8 @@ import { usePersons } from './persons/custom-hooks'
 import { useState } from 'react'
 import { Notify } from '../Notify'
 import { PhoneForm } from '../PhoneForm'
+import LoginForm from './LoginForm'
+import { useApolloClient } from '@apollo/client'
 
 
 
@@ -14,6 +16,8 @@ function App() {
 
   const {data, loading, error} = usePersons()
   const [errorMessage, setErrorMessage] = useState(null)
+  const [token, setToken] = useState(()=> localStorage.getItem('phonenumbers-user-token'))
+  const client = useApolloClient()
 
   
 
@@ -25,6 +29,15 @@ function App() {
 setErrorMessage(null)
     }, 5000);
   }
+
+
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
+
+
 
   return (
     <>
@@ -43,6 +56,10 @@ setErrorMessage(null)
           </>
         )  
       }
+  {
+  token 
+  ? <button onClick={logout}>cerrar sesion</button> 
+  : <LoginForm notifyError={notifyError} setToken={setToken}></LoginForm>}
       
       <PhoneForm notifyError={notifyError}/>
       <PersonForm notifyError={notifyError}/>

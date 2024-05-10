@@ -12,9 +12,28 @@ export const PersonForm = ({notifyError}) => {
     const [city, setCity] = useState('')
 
     const [createPerson] = useMutation(CREATE_PERSON, {
-        refetchQueries: [{ query: ALL_PERSONS}],
+        //esto es para volver a hacer fetch cada ves que se ejecuta create person
+        //refetchQueries: [{ query: ALL_PERSONS}],
         onError: (error) => {
             notifyError(error.graphQLErrors[0].message)
+        },
+        //para que no se haga fetch continuo es mejor hacer el update en la cache
+        //update es manual , con un store que tiene caches de todas las query, y responce que es la respuesta de la mutacion
+        update: (store, responce)=> {
+            //recuperamos toda la info de ALL_PERSONS es DataInStore
+            const dataInStore = store.readQuery({ query: ALL_PERSONS})
+            //aqui escribimos sobre esa query ALL_PERSONS
+            store.writeQuery({
+                query: ALL_PERSONS,
+                data: {
+                    ...dataInStore,
+                    allPersons: [
+                        ...dataInStore.allPersons,
+                        responce.data.addPerson
+                        // ^ aqui agregamos la nueva persona para mostrar en pantalla y no tener que hacer otro fetch
+                    ]
+                }
+            })
         }
     })
 
